@@ -20,7 +20,10 @@ for table_name in doc:
         for field in doc[table_name][fields]:            
             params += '\t{0}_{1} {2} NOT NULL,\n'.format(table_name.lower(),
                 field.lower(), doc[table_name][fields][field].lower())
-        params += '\tPRIMARY KEY({0}_id),\n\tUNIQUE({0}_id)'.format(table_name.lower())
+    params += '\t{0}_created INTEGER NOT NULL DEFAULT cast(extract(epoch from now()) AS INTEGER),\n'.format(table_name.lower())
+    params += '\t{0}_updated INTEGER NOT NULL DEFAULT cast(extract(epoch from now()) AS INTEGER),\n'.format(table_name.lower())
+    params += '\tPRIMARY KEY({0}_id),\n'.format(table_name.lower())
+    params += '\tUNIQUE({0}_id)\n'.format(table_name.lower())
     statements.append(CREATE_TABLE.format(table_name.lower(), params))
 
 with open(out_file, 'w') as f:

@@ -7,7 +7,7 @@ Category:
     fields:
         title: varchar(50)
 
-AuTHor:
+Author:
     fields:
         fName: varChar(64)
         lName: varchar(64)
