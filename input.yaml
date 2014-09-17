@@ -9,7 +9,7 @@ Category:
 
 Author:
     fields:
-        fName: varChar(64)
-        lName: varchar(64)
+        firstName: varChar(64)
+        lastName: varchar(64)
         Age: int
 
