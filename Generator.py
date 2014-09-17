@@ -2,11 +2,23 @@ import os
 import sys
 import yaml
 
+class Table:
+    def __init__(self, name):
+        self._name = ''
+        self._fields = []
+        self._relations = []
+
 if len(sys.argv) != 3:
     print('Usage: {0} "input.file" "output.file"'.format(os.path.basename(__file__)))
     sys.exit()
 
-CREATE_TABLE = 'CREATE TABLE "{0}" ({1});\n\n'
+CREATE_TABLE = """CREATE TABLE \"{0}\" (
+    \"{0}_id\" SERIAL PRIMARY KEY,
+{1}
+    \"{0}_created\" INTEGER NOT NULL DEFAULT cast(extract(epoch from now()) AS INTEGER),
+    \"{0}_updated\" INTEGER NOT NULL DEFAULT cast(extract(epoch from now()) AS INTEGER)
+    );\n\n"""
+
 in_file = sys.argv[1]
 out_file = sys.argv[2]
 statements = []
@@ -14,19 +26,20 @@ statements = []
 with open(in_file, 'r') as f:
     doc = yaml.load(f)
 
-for table_name in doc:
-    params = '\n\t{0}_id SERIAL,\n'.format(table_name.lower())
+for table_name in doc:    
+    t = Table(table_name)    
     for fields in doc[table_name]:
-        for field in doc[table_name][fields]:            
-            params += '\t{0}_{1} {2} NOT NULL,\n'.format(table_name.lower(),
+        addField = []
+        for field in doc[table_name][fields]:
+            addField.append(
+                '\t\"{0}_{1}\" {2}'.format(table_name.lower(),
                 field.lower(), doc[table_name][fields][field].lower())
-    params += '\t{0}_created INTEGER NOT NULL DEFAULT cast(extract(epoch from now()) AS INTEGER),\n'.format(table_name.lower())
-    params += '\t{0}_updated INTEGER NOT NULL DEFAULT cast(extract(epoch from now()) AS INTEGER),\n'.format(table_name.lower())
-    params += '\tPRIMARY KEY({0}_id),\n'.format(table_name.lower())
-    params += '\tUNIQUE({0}_id)\n'.format(table_name.lower())
-    statements.append(CREATE_TABLE.format(table_name.lower(), params))
+                )
+    statements += CREATE_TABLE.format(table_name.lower(), ',\n'.join(addField) + ',')
 
 with open(out_file, 'w') as f:
-    for statement in statements:
-        f.write(statement)
+    for stmt in statements:
+        f.write(stmt)
 print('SQL query saved to {0}'.format(os.path.abspath(out_file)))
+
+print(CREATE_TABLE.format("part", "hhhhh"))
