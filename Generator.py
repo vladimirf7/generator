@@ -2,16 +2,6 @@ import os
 import sys
 import yaml
 
-class Table:
-    def __init__(self, name):
-        self._name = ''
-        self._fields = []
-        self._relations = []
-
-if len(sys.argv) != 3:
-    print('Usage: {0} "input.file" "output.file"'.format(os.path.basename(__file__)))
-    sys.exit()
-
 CREATE_TABLE = """CREATE TABLE \"{0}\" (
     \"{0}_id\" SERIAL PRIMARY KEY,
 {1}
@@ -19,27 +9,40 @@ CREATE_TABLE = """CREATE TABLE \"{0}\" (
     \"{0}_updated\" INTEGER NOT NULL DEFAULT cast(extract(epoch from now()) AS INTEGER)
     );\n\n"""
 
+class Table:
+    def __init__(self, name):
+        self._name = ''
+        self._fields = {}
+        self._relations = []
+
+if len(sys.argv) != 3:
+    print(
+        'Usage: {0} "input.file" "output.file"'
+        .format(os.path.basename(__file__)))
+    sys.exit()
+
+
 in_file = sys.argv[1]
 out_file = sys.argv[2]
 statements = []
+tables = []
+
 
 with open(in_file, 'r') as f:
     doc = yaml.load(f)
 
-for table_name in doc:    
+for table_name in doc:   
     t = Table(table_name)    
-    for fields in doc[table_name]:
-        addField = []
-        for field in doc[table_name][fields]:
-            addField.append(
-                '\t\"{0}_{1}\" {2}'.format(table_name.lower(),
-                field.lower(), doc[table_name][fields][field].lower())
-                )
-    statements += CREATE_TABLE.format(table_name.lower(), ',\n'.join(addField) + ',')
+    for fields in doc[table_name]:        
+        for field_name in doc[table_name][fields]:
+            field_value = doc[table_name][fields][field_name].lower()
+            t._fields[field_name] = field_value            
+    tables.append(t)
+
+for table in tables:
+    stmt = 
 
 with open(out_file, 'w') as f:
     for stmt in statements:
         f.write(stmt)
 print('SQL query saved to {0}'.format(os.path.abspath(out_file)))
-
-print(CREATE_TABLE.format("part", "hhhhh"))
