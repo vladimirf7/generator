@@ -50,7 +50,9 @@ class Generator:
             for field_name, field_value in table._fields.items():
                 sql_fields.append('\t\"{0}_{1}\" {2}'.format(
                     table._name, field_name, field_value, ))
-            self._statements.append(CREATE_TABLE.format(table._name, ',\n'.join(sql_fields) + ','))
+            self._statements.append(CREATE_TABLE.format(
+                table._name, ',\n'.join(sql_fields) + ','))
+            sql_fields.clear()
 
     def create_sql_trigers(self):
         for table in self._tables:

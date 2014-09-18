@@ -1,15 +1,27 @@
-Article:
+Post:
     fields:
-        title: varchar(50)
-        text: text
+        content: text
+        title: varchar(255)
+
+Section:
+    fields:
+        title: varchar(255)
+
+User:
+    fields:
+        name: varchar(255)
+        email: varchar(255)
+
+Tag:
+    fields:
+        name: varchar(255)
 
 Category:
     fields:
-        title: varchar(50)
+        title: varchar
 
-Author:
+Comment:
     fields:
-        firstName: varChar(64)
-        lastName: varchar(64)
-        Age: int
-
+        date: integer
+        text: varchar(255)
+        author: varchar(255)
