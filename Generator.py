@@ -17,7 +17,7 @@ CREATE_TRIGGER = """\
 CREATE OR REPLACE FUNCTION update_{0}_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.{0}_updated = cast(extract(epoch from now()) as integer);
+    NEW.{0}_updated = CURRENT_TIMESTAMP;
     RETURN NEW;
 END;
 $$ language 'plpgsql';
