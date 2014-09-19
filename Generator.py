@@ -5,24 +5,26 @@ from table import Table
 
 CREATE_TABLE = """\
 CREATE TABLE "{0}" (
-\t"{0}_id" SERIAL PRIMARY KEY,
-{1}
-\t"{0}_created" INTEGER NOT NULL DEFAULT cast(extract(epoch from now()) \
-AS INTEGER),
-\t"{0}_updated" INTEGER NOT NULL DEFAULT cast(extract(epoch from now()) \
-AS INTEGER)
-);\n\n"""
+    "{0}_id" SERIAL PRIMARY KEY,
+    {1},
+    "{0}_created" timestamp DEFAULT CURRENT_TIMESTAMP,
+    "{0}_updated" timestamp DEFAULT CURRENT_TIMESTAMP
+);
+
+"""
 
 CREATE_TRIGGER = """\
 CREATE OR REPLACE FUNCTION update_{0}_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
-\tNEW.{0}_updated = cast(extract(epoch from now()) as integer);
-\tRETURN NEW;
+    NEW.{0}_updated = cast(extract(epoch from now()) as integer);
+    RETURN NEW;
 END;
 $$ language 'plpgsql';
 CREATE TRIGGER "tr_{0}_updated" BEFORE UPDATE ON "{0}" FOR EACH ROW \
-EXECUTE PROCEDURE update_{0}_timestamp();\n\n"""
+EXECUTE PROCEDURE update_{0}_timestamp();
+
+"""
 
 class Generator:
     def __init__(self, file_in, file_out):
@@ -44,15 +46,14 @@ class Generator:
             self._tables.append(t)
 
     def create_sql_tables(self):
-        sql_fields = []
 
         for table in self._tables:
+            sql_fields = []
             for field_name, field_value in table._fields.items():
-                sql_fields.append('\t\"{0}_{1}\" {2}'.format(
+                sql_fields.append('"{0}_{1}" {2}'.format(
                     table._name, field_name, field_value, ))
             self._statements.append(CREATE_TABLE.format(
-                table._name, ',\n'.join(sql_fields) + ','))
-            sql_fields.clear()
+                table._name, ',\n    '.join(sql_fields)))
 
     def create_sql_trigers(self):
         for table in self._tables:
